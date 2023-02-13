@@ -1,8 +1,3 @@
-.venv
-.ipynb_checkpoints
-data/
-
-# from slidev
 node_modules
 .DS_Store
 dist
