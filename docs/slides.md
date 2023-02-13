@@ -181,7 +181,7 @@ NNは層をひとつの単位として扱う。層はNNの縦一列を指す。
 
 ---
 
-活性化関数は各人工ニューロンに対して設定できるが、NNを考える場合は層ごとに設定する。というか活性化関数を一つの層として考える。人工ニューロンは内積とバイアスの和をそのまま出力するだけ。
+活性化関数は各人工ニューロンに対して設定できるが、NNを考える場合は層ごとに設定する。というか活性化関数を一つの層として考えたほうがよい。人工ニューロンは内積とバイアスの和をそのまま出力するだけ。
 
 図
 
@@ -279,21 +279,127 @@ class BatchNormalization:
 
 ### 畳み込み層
 
----
+画像のような2次元のデータを扱う際に用いることのできる層。カーネルと呼ばれる行列を用意し、入力データのある範囲との内積の様なものを全ての範囲で取る。
 
-### プーリング層
+```python
+class Conv2d():
+    pass
+```
+
+![gif](https://kenyu-life.com/wp-content/uploads/2019/03/cnn.gif)
 
 ---
 
 ### 再帰層
 
----
+時系列データを扱う際に用いることのできる層。前の時刻の出力を次の時刻の入力に取り入れる。
 
+```python
+class RNN():
+    pass
+```
 
 ---
 
 ## 活性化関数
 
-各層の出力を次の層へ渡す際にかける関数。
+各層の出力に対して用いる関数。非線形な関数を用いることで、NNの表現力を高める。これがないとNNが多層である意味がない=1層のNNと出来ることが変わらない。
+
+---
+
+### ReLU
+
+最も一般的な活性化関数。入力が0以下の場合は0を出力し、0より大きい場合は入力をそのまま出力する。
+
+$$
+y = \left\{
+\begin{array}{ll}
+x & (x \geq 0) \\
+0 & (x < 0)
+\end{array}
+\right.
+$$
+
+```python
+class ReLU:
+    def forward(self, x):
+        return x * (x > 0)
+```
+
+---
+
+### Leaky ReLU
+
+ReLUの改良版。入力が0以下場合にも微小な傾きを設定する。
+
+$$
+y = \left\{
+\begin{array}{ll}
+x & (x \geq 0) \\
+ax & (x < 0)
+\end{array}
+\right.
+$$
+
+```python
+class LeakyReLU:
+    def __init__(self, a):
+        self.a = a
+
+    def forward(self, x):
+        return np.where(x > 0, x, self.a * x)
+```
+
+---
+
+### Sigmoid
+
+0から1の値を出力する。0~1の値を出力したい場合（出力値に最大値と最小値を定めたい場合。Ex: 確率, 色）に用いる。
+
+$$
+y = \frac{1}{1 + e^{-x}}
+$$
+
+```python
+class Sigmoid:
+    def forward(self, x):
+        return 1 / (1 + np.exp(-x))
+```
+
+---
+
+### tanh
+
+sigmoidの範囲を-1から1に拡大したもの。sigmoidよりこっちを使った方が上手くいくといった場面がある。
+
+$$
+y = \frac{e^x - e^{-x}}{e^x + e^{-x}}
+$$
+
+```python
+class Tanh:
+    def forward(self, x):
+        return np.exp(x) - np.exp(-x) / np.exp(x) + np.exp(-x)
+```
+
+---
+
+### Softmax
+
+分類を行うNNの出力層に用いる。各クラスに対する確率を出力する。
+
+$$
+y_i = \frac{e^{x_i}}{\sum_{j=1}^{n} e^{x_j}}
+$$
+
+```python
+class Softmax:
+    def forward(self, x):
+        return np.exp(x) / np.sum(np.exp(x), axis=1, keepdims=True)
+```
+
+---
+
+# 学習
 
 ---
