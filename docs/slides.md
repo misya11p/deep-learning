@@ -451,7 +451,7 @@ NNの学習を最適化問題に落とし込むことで学習を行う
 
 ## 損失関数
 
-NNの出力と正解の差を表す関数。
+NNの出力と正解の差を表す関数。NNの学習で目的関数として設定される場合が多い。
 
 ---
 
@@ -510,25 +510,54 @@ Pythonで実装してみよう
 
 ```python
 import random
+eta = 0.001 # 学習率
+n = 100 # 学習回数
 
-def f(x):
+def f(x): # 目的関数
     return x ** 2
 
-def df(x):
+def df(x): # 目的関数の微分
     return 2 * x
 
 x = random.uniform(-10, 10) # xの初期値を-10~10でランダムに設定
 print(f"学習前: x = {x}, f(x) = {f(x)}")
 
-eta = 0.001 # 学習率
-n = 100 # 学習回数
 for i in range(n):
-    x = x - eta * df(x)
+    dx = df(x) # 勾配を求める
+    x -= eta * dx # xの更新
 
 print(f"学習後: x = {x}, f(x) = {f(x)}")
 ```
 
 動画
+
+---
+
+また多くの深層学習ライブラリでは勾配の計算が自動で行われる。PyTorchを使って実装するとこうなる。
+
+```python
+import torch
+eta = 0.001 # 学習率
+n = 100 # 学習回数
+
+def f(x): # 目的関数
+    return x ** 2
+
+x = torch.rand(requires_grad=True) * 20 - 10 # xの初期値を-10~10でランダムに設定
+optim = torch.optim.SGD(x, lr=0.001) # 勾配降下法を扱うためのもの
+
+print(f"学習前: x = {x.item()}, f(x) = {f(x).item()}")
+
+for i in range(n):
+    y = f(x) # 目的関数の値を計算
+    y.backward() # 勾配を計算
+    optim.step() # 勾配降下法に基づいて変数を更新
+    optim.zero_grad() # 保存されている勾配をリセット
+
+print(f"学習後: x = {x.item()}, f(x) = {f(x).item()}")
+```
+
+このコードの目的関数をNNにして、変数をNNのパラメータにすればNNの学習ができる。
 
 ---
 
